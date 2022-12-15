@@ -1,0 +1,18 @@
+# 
+data_dir: test_nii
+annotation_source: abagen
+annotation_desc: genepc1
+annotation_space: fsaverage
+annotation_den: 10k
+src_space:  MNI152
+trg_space: fsaverage
+method: linear
+resampling: transform_to_alt  
+alt_spec: 
+- fsaverage
+- 10k
+nulls: nulls.alexander_bloch
+atlas: fsaverage 
+density: 10k
+n_perm: 100  
+seed: 1000
