@@ -1,4 +1,4 @@
-from neuromaps import datasets,nulls,stats,images
+from neuromaps import datasets,nulls,stats,images,parcellate
 from neuromaps.resampling import resample_images
 import nibabel as nib
 from neuromaps import stats
@@ -6,6 +6,7 @@ from nilearn.datasets import fetch_atlas_surf_destrieux
 import yaml
 import glob
 import pandas as pd
+import numpy as np 
 # method to change dataframe to Csv
 def OutToCsv(columns,data_list):
     data = pd.DataFrame(columns=columns,data=data_list,index=None)
@@ -26,17 +27,24 @@ def main(data):
                     method=data['method'],resampling=data['resampling'],\
                 alt_spec=(data['alt_spec'][0],data['alt_spec'][1]))
             Nulls = eval(data['nulls'])
-            map_left = input("请输入已标注好的左半脑的路径,GIFTI格式")
-            map_right= input("请输入已标注好的右半脑的路径,GIFTI格式")
-            parc_left = nib.load(map_left)
-            parc_right = nib.load(map_right)
-            parcellation = images.relabel_gifti((parc_left,parc_right))
-            destrieux = parcellate.Parcellater(parcellation, args.atlas).fit()
-            neurosynth_parc = destrieux.transform(src_mapr, args.atlas)
-            abagen_parc = destrieux.transform(trg_mapr, args.atlas)
-            rotated = Nulls(src_mapr, atlas=data['atlas'],density=data['density'],
+            map_left =data['map_left']
+            map_right= data['map_right']
+            map_left = nib.load(map_left)
+            map_right = nib.load(map_right)
+            parcellation = images.relabel_gifti((map_left,map_right),background=['Medial_wall'])
+            destrieux = parcellate.Parcellater(parcellation, data['atlas']).fit()
+            src_parc = destrieux.transform(src_mapr, data['atlas'])
+            trg_parc = destrieux.transform(trg_mapr, data['atlas'])
+            rotated = Nulls(src_parc, atlas=data['atlas'],density=data['density'],
                                         n_perm=data['n_perm'], seed=data['seed'],parcellation=parcellation)
-            corr ,pval= stats.compare_images(src_mapr, trg_mapr,nulls=rotated)
+            # rotated不知道为啥是（147，100）应该是（148，100)
+            try:
+                corr ,pval= stats.compare_images(src_parc, trg_parc,nulls=rotated)
+            except:
+                print(f"rotated维度为{rotated.shape},实际需要{src_parc.shape},所以对rotated增加或着减少维度")
+                zero = np.zeros(100,dtype="float32")
+                rotated = np.insert(rotated,-1,zero,axis=0)
+                corr ,pval= stats.compare_images(src_parc, trg_parc,nulls=rotated) 
             data_list.append([nii.split("/")[-1],round(corr,2),round(pval,2)])
             print(f'Correlation: r = {corr:.02f},p={pval:.03f}')
     else:

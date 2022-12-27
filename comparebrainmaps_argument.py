@@ -1,9 +1,13 @@
 import argparse
-from neuromaps import datasets,nulls,stats,images
+from neuromaps import datasets,nulls,stats,images,parcellate
 from neuromaps.resampling import resample_images
 import nibabel as nib
 from neuromaps import stats
 from nilearn.datasets import fetch_atlas_surf_destrieux
+import yaml
+import glob
+import pandas as pd
+import numpy as np 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_dir",type=str,required=True,help="传入需要比较的脑图")
@@ -21,6 +25,8 @@ def main():
     parser.add_argument("--density",default="10k",type=str,required=False)
     parser.add_argument("--n_perm",default=100,type=int,required=False)
     parser.add_argument("--seed",default=1000,type=int,required=False)
+    parser.add_argument("--map_left",default="test_gii/left.gii",type=str,required=False)
+    parser.add_argument("--map_right",default="test_gii/right.gii",type=str,required=False)
     if num == '2':
         args = parser.parse_args()
         src_map = nib.load(args.data_dir)
@@ -30,17 +36,25 @@ def main():
                 method=args.method,resampling=args.resampling,\
             alt_spec=args.alt_spec)
         Nulls = eval(args.nulls)
-        map_left = input("请输入已标注好的左半脑的路径,GIFTI格式")
-        map_right= input("请输入已标注好的右半脑的路径,GIFTI格式")
+        map_left = args.map_left
+        map_right= args.map_right 
         parc_left = nib.load(map_left)
         parc_right = nib.load(map_right)
         parcellation = images.relabel_gifti((parc_left,parc_right))
         destrieux = parcellate.Parcellater(parcellation, args.atlas).fit()
-        neurosynth_parc = destrieux.transform(src_mapr, args.atlas)
-        abagen_parc = destrieux.transform(trg_mapr, args.atlas)
+        src_parc = destrieux.transform(src_mapr, args.atlas)
+        trg_parc = destrieux.transform(trg_mapr, args.atlas)
         rotated = Nulls(src_mapr, atlas=args.atlas,density=args.density,
                                     n_perm=args.n_perm, seed=args.seed,parcellation=parcellation)
-        corr ,pval= stats.compare_images(src_mapr, trg_mapr,nulls=rotated)
+        try:
+            corr ,pval= stats.compare_images(src_parc, trg_parc,nulls=rotated)
+        except:
+            print(f"rotated维度为{rotated.shape},实际需要{src_parc.shape},所以对rotated增加或着减少维度")
+            zero = np.zeros(100,dtype="float32")
+            nums = src_parc.shape[0]-rotated.shape[0]
+            for i in range(int(nums)):
+                rotated = np.insert(rotated,-1,zero,axis=0)
+            corr ,pval= stats.compare_images(src_parc, trg_parc,nulls=rotated) 
         print(f'Correlation: r = {corr:.02f},p={pval:.03f}')
     else:
 

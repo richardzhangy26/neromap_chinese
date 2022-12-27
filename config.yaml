@@ -1,4 +1,4 @@
-# 
+# volumetric data and non-parcellated data paramteter
 data_dir: test_nii
 annotation_source: abagen
 annotation_desc: genepc1
@@ -15,4 +15,7 @@ nulls: nulls.alexander_bloch
 atlas: fsaverage 
 density: 10k
 n_perm: 100  
-seed: 1000
+seed: 1234
+# additional parcellated data parameter
+map_left: test_gii/left.gii
+map_right: test_gii/right.gii

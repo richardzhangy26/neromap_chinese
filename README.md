@@ -1,24 +1,26 @@
 # 目录结构
 
 ```
+├── README.md
 ├── comparebrainmaps_argument.py
 ├── comparebrainmaps_yaml.py
 ├── config.yaml
-├── neuromaps-main.zip
-├── pic_cluster.nii
-├── readme.md
-├── test.ipynb
+├── demo.ipynb
+├── output.csv
+├── test_gii
+│   ├── left.gii
+│   └── right.gii
 ├── test_nii
-│   ├── neg_mVSnm_vox80_cluster.nii
-│   ├── neg_mVSnm_vox80_cluster的副本.nii
-│   ├── neg_mVSnm_vox80_cluster的副本2.nii
-│   ├── neg_mVSnm_vox80_cluster的副本3.nii
-│   ├── neg_mVSnm_vox80_cluster的副本4.nii
-│   ├── neg_nmVSm_vox80_cluster.nii
-│   ├── neg_nmVSm_vox80_cluster的副本.nii
-│   ├── neg_nmVSm_vox80_cluster的副本2.nii
-│   ├── neg_nmVSm_vox80_cluster的副本3.nii
-│   └── neg_nmVSm_vox80_cluster的副本4.nii
+│   ├── neg_mVSnm_vox80_cluster.nii
+│   ├── neg_mVSnm_vox80_cluster的副本.nii
+│   ├── neg_mVSnm_vox80_cluster的副本2.nii
+│   ├── neg_mVSnm_vox80_cluster的副本3.nii
+│   ├── neg_mVSnm_vox80_cluster的副本4.nii
+│   ├── neg_nmVSm_vox80_cluster.nii
+│   ├── neg_nmVSm_vox80_cluster的副本.nii
+│   ├── neg_nmVSm_vox80_cluster的副本2.nii
+│   ├── neg_nmVSm_vox80_cluster的副本3.nii
+│   └── neg_nmVSm_vox80_cluster的副本4.nii
 └── 安装指南.md
 
 ```
@@ -230,7 +232,9 @@ null_map的生成需要上述9种方法和5中参数，返回值为（顶点，�
 
 ### Nulls for volumetric data[](https://netneurolab.github.io/neuromaps/user_guide/nulls.html#nulls-for-volumetric-data)
 
-大多数空间空值在以表面坐标系为代表的数据中效果最好。如果你正在处理以MNI152系统表示的数据，你必须使用以下三种空模型之一。
+大多数空间空值在以表面坐标系为代表的数据中效果最好。如果你正在处理以MNI152系统表示的数据，你必须使用以下三种空模型之一。再使用之前先在命令行输入，来安装依赖库
+
+**`pip install brinsmash`**
 
 - **neuromaps.nulls.burt2018（）**
 - **neuromaps.nulls.burt2020()**
@@ -241,7 +245,7 @@ null_map的生成需要上述9种方法和5中参数，返回值为（顶点，�
 ### Nulls for parcellated data（surface）
 
 可参考[官方文档](https://netneurolab.github.io/neuromaps/user_guide/nulls.html#nulls-with-parcellated-data)
-
+或者查看`demo.ipynb`
 # 使用指南
 
 ## comparebrainmaps_yaml.py使用
@@ -275,7 +279,7 @@ null_map的生成需要上述9种方法和5中参数，返回值为（顶点，�
 这里的使用参数与上文类似，除了`data_dir`替换为单独脑图名，其他参数类似，再终端里输入以下命令得到一个结果的脑图相关系数和pvalue。不保存csv
 
 ```
-python comparebrainmaps_argument.py --data_dir test_nii/neg_mVSnm_vox80_cluster.nii  --annotation_desc  genepc1  --src_space  MNI152 --trg_space fsaverage  --resampling transform_to_alt  --alt_spec fsaverage 10k --nulls nulls.alexander_bloch --nulls nulls.alexander_bloch --density 10k --n_perm 100 --seed 1000
+python comparebrainmaps_argument.py --data_dir test_nii/neg_mVSnm_vox80_cluster.nii  --annotation_desc  genepc1  --src_space  MNI152 --trg_space fsaverage  --resampling transform_to_alt  --alt_spec fsaverage 10k --nulls nulls.alexander_bloch --nulls nulls.alexander_bloch --density 10k --n_perm 100 --seed 1000 --map_left test_gii/left.gii --map_right test_gii/rigtht.gii
 ```
 
 ![image-20221206174856822](https://cdn.jsdelivr.net/gh/richardzhangy26/Pic@main/srcimage-20221206174856822.png)
