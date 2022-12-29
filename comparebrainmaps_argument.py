@@ -44,12 +44,14 @@ def main():
         destrieux = parcellate.Parcellater(parcellation, args.atlas).fit()
         src_parc = destrieux.transform(src_mapr, args.atlas)
         trg_parc = destrieux.transform(trg_mapr, args.atlas)
-        rotated = Nulls(src_mapr, atlas=args.atlas,density=args.density,
+        rotated = Nulls(src_parc, atlas=args.atlas,density=args.density,
                                     n_perm=args.n_perm, seed=args.seed,parcellation=parcellation)
+        #rotated的维度为（147，100），而src_parc维度为（147，100）不知道为什么。
+        #所以try except通过增加100个0让rotated维度增加到148
         try:
             corr ,pval= stats.compare_images(src_parc, trg_parc,nulls=rotated)
         except:
-            print(f"rotated维度为{rotated.shape},实际需要{src_parc.shape},所以对rotated增加或着减少维度")
+            print(f"rotated维度为{rotated.shape},实际需要({src_parc.shape[0]},100),所以对rotated增加或着减少维度")
             zero = np.zeros(100,dtype="float32")
             nums = src_parc.shape[0]-rotated.shape[0]
             for i in range(int(nums)):

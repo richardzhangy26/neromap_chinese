@@ -1,3 +1,7 @@
+[Github链接](https://github.com/richardzhangy26/neromap_chinese)
+
+[Gitee链接](https://gitee.com/richardzhangy26/neromap_chinese)
+
 # 目录结构
 
 ```
@@ -216,9 +220,9 @@ Generates null maps for data using method from [[SN9\]](https://netneurolab.gith
 
   `--nulls nulls.alexander_bloch` 可选择的空模型，不填默认为 nulls.alexander_bloch
 
-  `--nulls nulls.alexander_bloch`可选择的atlas表面，默认为fsaverage
+   `--atlas`可选择的atlas表面。如果 `resampling='transform_to_alt`，那么 这里应该与重采样的 `atlas`保持一致
 
-  `--density 10k`可选择的altas的密度分辨率，必须与选择[atlas](##annotation_source,annotation_desc,annotation_space,annotation_den)对应上
+  `--density 10k`可选择的altas的密度分辨率，必须与选择atlas兼容
 
   `--n_perm 100`可选择生成Null maps 或者permutaitions的数量， 默认100
 
@@ -246,13 +250,22 @@ null_map的生成需要上述9种方法和5中参数，返回值为（顶点，�
 
 可参考[官方文档](https://netneurolab.github.io/neuromaps/user_guide/nulls.html#nulls-with-parcellated-data)
 或者查看`demo.ipynb`
+
+`--map_left`和 `--map_right`参数分别代表左右脑的gii格式的lable files。
+
+文件夹 `test_gii`	中就是官方的左右脑的lable files
+
+然后经过函数`relabel_gifti`更新GIFTI图像，使lable id在半球上是连续的
+
+
+
 # 使用指南
 
 ## comparebrainmaps_yaml.py使用
 
 首先在`config.yaml`文件配置所需参数。
 
-![image-20221206173031629](https://cdn.jsdelivr.net/gh/richardzhangy26/Pic@main/srcimage-20221206173031629.png)
+![](https://cdn.jsdelivr.net/gh/richardzhangy26/Pic@main/src202212291305097.png)
 
 具体参数介绍可见上文。
 

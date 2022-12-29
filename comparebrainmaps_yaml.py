@@ -38,12 +38,15 @@ def main(data):
             rotated = Nulls(src_parc, atlas=data['atlas'],density=data['density'],
                                         n_perm=data['n_perm'], seed=data['seed'],parcellation=parcellation)
             # rotated不知道为啥是（147，100）应该是（148，100)
+            # 所以try except通过增加100个0让rotated维度增加到148
             try:
                 corr ,pval= stats.compare_images(src_parc, trg_parc,nulls=rotated)
             except:
-                print(f"rotated维度为{rotated.shape},实际需要{src_parc.shape},所以对rotated增加或着减少维度")
+                print(f"rotated维度为{rotated.shape},实际需要({src_parc.shape[0]},100),所以对rotated增加维度")
                 zero = np.zeros(100,dtype="float32")
-                rotated = np.insert(rotated,-1,zero,axis=0)
+                nums = src_parc.shape[0]-rotated.shape[0]
+                for i in range(int(nums)):
+                  rotated = np.insert(rotated,-1,zero,axis=0)
                 corr ,pval= stats.compare_images(src_parc, trg_parc,nulls=rotated) 
             data_list.append([nii.split("/")[-1],round(corr,2),round(pval,2)])
             print(f'Correlation: r = {corr:.02f},p={pval:.03f}')
