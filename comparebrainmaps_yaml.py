@@ -27,27 +27,22 @@ def main(data):
                     method=data['method'],resampling=data['resampling'],\
                 alt_spec=(data['alt_spec'][0],data['alt_spec'][1]))
             Nulls = eval(data['nulls'])
+            destrieux = fetch_atlas_surf_destrieux()
             map_left =data['map_left']
             map_right= data['map_right']
             map_left = nib.load(map_left)
             map_right = nib.load(map_right)
-            parcellation = images.relabel_gifti((map_left,map_right),background=['Medial_wall'])
+            parcellation = images.relabel_gifti((map_left,map_right))
             destrieux = parcellate.Parcellater(parcellation, data['atlas']).fit()
             src_parc = destrieux.transform(src_mapr, data['atlas'])
             trg_parc = destrieux.transform(trg_mapr, data['atlas'])
+            parcellation1 = images.relabel_gifti((map_left,map_right)) 
             rotated = Nulls(src_parc, atlas=data['atlas'],density=data['density'],
-                                        n_perm=data['n_perm'], seed=data['seed'],parcellation=parcellation)
-            # rotated不知道为啥是（147，100）应该是（148，100)
-            # 所以try except通过增加100个0让rotated维度增加到148
+                                        n_perm=data['n_perm'], seed=data['seed'],parcellation=parcellation1)
             try:
                 corr ,pval= stats.compare_images(src_parc, trg_parc,nulls=rotated)
             except:
-                print(f"rotated维度为{rotated.shape},实际需要({src_parc.shape[0]},100),所以对rotated增加维度")
-                zero = np.zeros(100,dtype="float32")
-                nums = src_parc.shape[0]-rotated.shape[0]
-                for i in range(int(nums)):
-                  rotated = np.insert(rotated,-1,zero,axis=0)
-                corr ,pval= stats.compare_images(src_parc, trg_parc,nulls=rotated) 
+                raise ValueError("rotated维度不对")
             data_list.append([nii.split("/")[-1],round(corr,2),round(pval,2)])
             print(f'Correlation: r = {corr:.02f},p={pval:.03f}')
     else:
@@ -73,7 +68,7 @@ if __name__ =="__main__":
     print("请输入\n1.Nulls with non-parcellated surface data or volumetric data \n2、Nulls with parcellated data\n")
     num2= input("请输入选项")
     #加载yaml配置
-    with open("config.yaml") as f:
+    with open("/home/parallels/github/neromap_chinese/config.yaml") as f:
         data = yaml.load(f,Loader=yaml.FullLoader)
     data_frame = main(data)
     # print(data_frame)
